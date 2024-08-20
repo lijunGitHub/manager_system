@@ -246,10 +246,10 @@
             <el-form-item label="用户性别">
               <el-select v-model="form.sex" placeholder="请选择性别">
                 <el-option
-                  v-for="dict in dict.type.sys_user_sex"
-                  :key="dict.value"
-                  :label="dict.label"
-                  :value="dict.value"
+                    v-for="dict in dict.type.sys_user_sex"
+                    :key="dict.value"
+                    :label="dict.label"
+                    :value="dict.value"
                 ></el-option>
               </el-select>
             </el-form-item>
@@ -258,9 +258,9 @@
             <el-form-item label="状态">
               <el-radio-group v-model="form.status">
                 <el-radio
-                  v-for="dict in dict.type.sys_normal_disable"
-                  :key="dict.value"
-                  :label="dict.value"
+                    v-for="dict in dict.type.sys_normal_disable"
+                    :key="dict.value"
+                    :label="dict.value"
                 >{{dict.label}}</el-radio>
               </el-radio-group>
             </el-form-item>
@@ -271,11 +271,11 @@
             <el-form-item label="岗位">
               <el-select v-model="form.postIds" multiple placeholder="请选择岗位">
                 <el-option
-                  v-for="item in postOptions"
-                  :key="item.postId"
-                  :label="item.postName"
-                  :value="item.postId"
-                  :disabled="item.status == 1"
+                    v-for="item in postOptions"
+                    :key="item.postId"
+                    :label="item.postName"
+                    :value="item.postId"
+                    :disabled="item.status == 1"
                 ></el-option>
               </el-select>
             </el-form-item>
@@ -284,11 +284,11 @@
             <el-form-item label="角色">
               <el-select v-model="form.roleIds" multiple placeholder="请选择角色">
                 <el-option
-                  v-for="item in roleOptions"
-                  :key="item.roleId"
-                  :label="item.roleName"
-                  :value="item.roleId"
-                  :disabled="item.status == 1"
+                    v-for="item in roleOptions"
+                    :key="item.roleId"
+                    :label="item.roleName"
+                    :value="item.roleId"
+                    :disabled="item.status == 1"
                 ></el-option>
               </el-select>
             </el-form-item>
@@ -299,6 +299,21 @@
             <el-form-item label="备注">
               <el-input v-model="form.remark" type="textarea" placeholder="请输入内容"></el-input>
             </el-form-item>
+          </el-col>
+        </el-row>
+        <!-- 新增省市县乡村级联选择器 -->
+        <el-row>
+          <el-col :span="12">
+              <el-form-item label="所在地" prop="location">
+                <el-cascader
+                  placeholder="请选择所在地"
+                  v-model="form.areaCode"
+                  :options="locationOptions"
+                  :props="locationProps"
+                  @change="handleLocationChange"
+                  clearable
+                />
+              </el-form-item>
           </el-col>
         </el-row>
       </el-form>
@@ -341,7 +356,18 @@
 </template>
 
 <script>
-import { listUser, getUser, delUser, addUser, updateUser, resetUserPwd, changeUserStatus, deptTreeSelect } from "@/api/system/user";
+import {
+  listUser,
+  getUser,
+  delUser,
+  addUser,
+  updateUser,
+  resetUserPwd,
+  changeUserStatus,
+  deptTreeSelect,
+
+} from "@/api/system/user";
+import {searchParentByCode, searchSubByCode} from "@/api/system/areacode"
 import { getToken } from "@/utils/auth";
 import Treeselect from "@riophae/vue-treeselect";
 import "@riophae/vue-treeselect/dist/vue-treeselect.css";
@@ -382,8 +408,34 @@ export default {
       postOptions: [],
       // 角色选项
       roleOptions: [],
+      //地址选项
+      selectAreaOptions:[0],
+      areaCode:'0',
+      locationOptions:[0],
+      locationProps:{
+        value:"value",
+        label: "label",
+        children: "children",
+        lazy:true,
+        lazyLoad:this.loadLocationData,
+        checkStrictly:true
+      },
       // 表单参数
-      form: {},
+      form: {
+        nickName: '',
+        deptId: null,
+        phonenumber: '',
+        email: '',
+        userName: '',
+        password: '',
+        sex: '',
+        status: '',
+        postIds: [],
+        roleIds: [],
+        remark: '',
+        areaCode: '',
+        location:[]
+      },
       defaultProps: {
         children: "children",
         label: "label"
@@ -461,6 +513,10 @@ export default {
   },
   created() {
     this.getList();
+    // searchSubByCode();
+    // searchParentByCode();
+    // 在组件创建时加载第一级数据
+    // this.getAProvinceData(this.areaCode);
     this.getDeptTree();
     this.getConfigKey("sys.user.initPassword").then(response => {
       this.initPassword = response.msg;
@@ -568,6 +624,12 @@ export default {
         this.open = true;
         this.title = "添加用户";
         this.form.password = this.initPassword;
+        this.queryParams.pageSize=1000000;
+        searchSubByCode(this.queryParams,this.selectAreaOptions).then(response => {
+          console.log(response.data.data)
+          this.locationOptions=response.data.data
+          this.queryParams.pageSize=10;
+        });
       });
     },
     /** 修改按钮操作 */
@@ -583,6 +645,13 @@ export default {
         this.open = true;
         this.title = "修改用户";
         this.form.password = "";
+        this.selectAreaOptions = this.form.areaCode
+        //TODO 根据code查询全部
+        this.queryParams.pageSize=1000000;
+        searchParentByCode(this.queryParams,this.selectAreaOptions).then(response => {
+          this.locationOptions=response.data
+          this.queryParams.pageSize=10;
+        });
       });
     },
     /** 重置密码按钮操作 */
@@ -620,6 +689,7 @@ export default {
               this.getList();
             });
           } else {
+            console.log(this.form)
             addUser(this.form).then(response => {
               this.$modal.msgSuccess("新增成功");
               this.open = false;
@@ -670,6 +740,69 @@ export default {
     // 提交上传文件
     submitFileForm() {
       this.$refs.upload.submit();
+    },
+    // ... 其他方法 ...
+    getAProvinceData(areaCode){
+      console.log(444)
+      searchSubByCode(areaCode).then(response => {
+        console.log(response.data);
+        this.locationOptions=response.data;
+      });
+    },
+    handleLocationChange(values) {
+      if(values !== undefined) {
+        this.form.areaCode = values[values.length - 1]
+        console.log(this.form.areaCode)
+      }
+    },
+    //加载懒数据
+    loadLocationData(node,resolve){
+      const  {value} = node;
+      const  {level} = node;
+      // const  {label} = node;
+      // const  {level} = node;
+      // console.log("test:",this.selectAreaOptions)
+      // const labelPaths = {
+      //   value: value,
+      //   label: label,
+      //   children: []
+      // }
+      // if(this.selectAreaOptions.length >0 ){
+      //   if(level === 2) {
+      //     const children = this.selectAreaOptions[0].children
+      //     if (undefined === children || children.length === 0) {
+      //       this.selectAreaOptions[0].children.push(labelPaths)
+      //     }
+      //   }else if( level === 3 ){
+      //     const children = this.selectAreaOptions[0].children[0].children
+      //     if (undefined === children || children.length === 0) {
+      //       this.selectAreaOptions[0].children[0].children.push(labelPaths)
+      //     }
+      //   }else if( level===4 ){
+      //     const children = this.selectAreaOptions[0].children[0].children[0].children
+      //     if (undefined === children || children.length === 0) {
+      //       this.selectAreaOptions[0].children[0].children[0].children.push(labelPaths)
+      //     }
+      //   }else if( level===5 ){
+      //     const children = this.selectAreaOptions[0].children[0].children[0].children[0].children
+      //     if (undefined === children || children.length === 0) {
+      //       this.selectAreaOptions[0].children[0].children[0].children[0].children.push(labelPaths)
+      //     }
+      //   }
+      // }else{
+      //   this.selectAreaOptions.push(labelPaths)
+      // }
+      let  areacode = "";
+      if(level === "1"){
+        areacode = "0"
+      }else {
+        areacode = value;
+      }
+      this.queryParams.pageSize=1000000;
+      searchSubByCode(this.queryParams,areacode).then(response => {
+        console.log(response.data)
+        resolve(response.data);
+      });
     }
   }
 };

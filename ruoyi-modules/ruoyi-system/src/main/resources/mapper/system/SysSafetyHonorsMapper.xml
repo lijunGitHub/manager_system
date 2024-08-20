@@ -1,0 +1,111 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.ruoyi.system.mapper.SysSafetyHonorsMapper">
+    
+    <resultMap type="SysSafetyHonors" id="SysSafetyHonorsResult">
+        <result property="id"    column="id"    />
+        <result property="honoraryName"    column="honorary_name"    />
+        <result property="honoraryType"    column="honorary_type"    />
+        <result property="belongMonitorCenter"    column="belong_monitor_center"    />
+        <result property="monitorCenterName"    column="monitor_center_name"    />
+        <result property="issuedUnits"    column="issued_units"    />
+        <result property="issuedPerson"    column="issued_person"    />
+        <result property="issuedTime"    column="issued_time"    />
+        <result property="remark"    column="remark"    />
+        <result property="honorPictures"    column="honor_pictures"    />
+        <result property="createTime"    column="create_time"    />
+        <result property="updateTime"    column="update_time"    />
+        <result property="userId"    column="user_id"    />
+        <result property="deptId"    column="dept_id"    />
+    </resultMap>
+
+    <sql id="selectSysSafetyHonorsVo">
+        select id, honorary_name, honorary_type, belong_monitor_center, issued_units, issued_person, issued_time, remark, honor_pictures, create_time, update_time from sys_safety_honors
+    </sql>
+
+    <select id="selectSysSafetyHonorsList" parameterType="SysSafetyHonors" resultMap="SysSafetyHonorsResult">
+        select sh.id, sh.honorary_name, sh.honorary_type, sh.belong_monitor_center,sys_monitor_center.monitor_center_name as monitor_center_name,  sh.issued_units, sh.issued_person, sh.issued_time, sh.remark, sh.honor_pictures, sh.create_time, sh.update_time from sys_safety_honors sh
+        left join sys_monitor_center on sh.belong_monitor_center = sys_monitor_center.id
+        left join sys_dept d on sh.dept_id=d.dept_id
+        left join sys_user u on sh.user_id=u.user_id
+        <where>  
+            <if test="honoraryName != null  and honoraryName != ''"> and honorary_name like concat('%', #{honoraryName}, '%')</if>
+            <if test="honoraryType != null  and honoraryType != ''"> and honorary_type = #{honoraryType}</if>
+            <if test="belongMonitorCenter != null  and belongMonitorCenter != ''"> and belong_monitor_center = #{belongMonitorCenter}</if>
+            <if test="issuedUnits != null  and issuedUnits != ''"> and issued_units = #{issuedUnits}</if>
+            <if test="issuedPerson != null  and issuedPerson != ''"> and issued_person = #{issuedPerson}</if>
+            <if test="issuedTime != null "> and issued_time = #{issuedTime}</if>
+            <if test="deptId != null and deptId != 0">
+                AND (u.dept_id = #{deptId} OR u.dept_id IN ( SELECT t.dept_id FROM sys_dept t WHERE find_in_set(#{deptId}, ancestors) ))
+            </if>
+            ${params.dataScope}
+        </where>
+    </select>
+    
+    <select id="selectSysSafetyHonorsById" parameterType="Long" resultMap="SysSafetyHonorsResult">
+        <include refid="selectSysSafetyHonorsVo"/>
+        where id = #{id}
+    </select>
+
+    <insert id="insertSysSafetyHonors" parameterType="SysSafetyHonors" useGeneratedKeys="true" keyProperty="id">
+        insert into sys_safety_honors
+        <trim prefix="(" suffix=")" suffixOverrides=",">
+            <if test="honoraryName != null and honoraryName != ''">honorary_name,</if>
+            <if test="honoraryType != null and honoraryType != ''">honorary_type,</if>
+            <if test="belongMonitorCenter != null and belongMonitorCenter != ''">belong_monitor_center,</if>
+            <if test="issuedUnits != null and issuedUnits != ''">issued_units,</if>
+            <if test="issuedPerson != null and issuedPerson != ''">issued_person,</if>
+            <if test="issuedTime != null">issued_time,</if>
+            <if test="remark != null">remark,</if>
+            <if test="honorPictures != null and honorPictures != ''">honor_pictures,</if>
+            <if test="createTime != null">create_time,</if>
+            <if test="updateTime != null">update_time,</if>
+            <if test="userId != null">user_id,</if>
+            <if test="deptId != null">dept_id,</if>
+         </trim>
+        <trim prefix="values (" suffix=")" suffixOverrides=",">
+            <if test="honoraryName != null and honoraryName != ''">#{honoraryName},</if>
+            <if test="honoraryType != null and honoraryType != ''">#{honoraryType},</if>
+            <if test="belongMonitorCenter != null and belongMonitorCenter != ''">#{belongMonitorCenter},</if>
+            <if test="issuedUnits != null and issuedUnits != ''">#{issuedUnits},</if>
+            <if test="issuedPerson != null and issuedPerson != ''">#{issuedPerson},</if>
+            <if test="issuedTime != null">#{issuedTime},</if>
+            <if test="remark != null">#{remark},</if>
+            <if test="honorPictures != null and honorPictures != ''">#{honorPictures},</if>
+            <if test="createTime != null">#{createTime},</if>
+            <if test="updateTime != null">#{updateTime},</if>
+            <if test="userId != null">#{userId},</if>
+            <if test="deptId != null">#{deptId},</if>
+         </trim>
+    </insert>
+
+    <update id="updateSysSafetyHonors" parameterType="SysSafetyHonors">
+        update sys_safety_honors
+        <trim prefix="SET" suffixOverrides=",">
+            <if test="honoraryName != null and honoraryName != ''">honorary_name = #{honoraryName},</if>
+            <if test="honoraryType != null and honoraryType != ''">honorary_type = #{honoraryType},</if>
+            <if test="belongMonitorCenter != null and belongMonitorCenter != ''">belong_monitor_center = #{belongMonitorCenter},</if>
+            <if test="issuedUnits != null and issuedUnits != ''">issued_units = #{issuedUnits},</if>
+            <if test="issuedPerson != null and issuedPerson != ''">issued_person = #{issuedPerson},</if>
+            <if test="issuedTime != null">issued_time = #{issuedTime},</if>
+            <if test="remark != null">remark = #{remark},</if>
+            <if test="honorPictures != null and honorPictures != ''">honor_pictures = #{honorPictures},</if>
+            <if test="createTime != null">create_time = #{createTime},</if>
+            <if test="updateTime != null">update_time = #{updateTime},</if>
+        </trim>
+        where id = #{id}
+    </update>
+
+    <delete id="deleteSysSafetyHonorsById" parameterType="Long">
+        delete from sys_safety_honors where id = #{id}
+    </delete>
+
+    <delete id="deleteSysSafetyHonorsByIds" parameterType="String">
+        delete from sys_safety_honors where id in 
+        <foreach item="id" collection="array" open="(" separator="," close=")">
+            #{id}
+        </foreach>
+    </delete>
+</mapper>

@@ -25,6 +25,14 @@ public class SecurityUtils
     }
 
     /**
+     * 部门ID
+     */
+    public static Long getDeptId()
+    {
+        return SecurityContextHolder.getDeptId();
+    }
+
+    /**
      * 获取用户名称
      */
     public static String getUsername()
@@ -113,5 +121,17 @@ public class SecurityUtils
     {
         BCryptPasswordEncoder passwordEncoder = new BCryptPasswordEncoder();
         return passwordEncoder.matches(rawPassword, encodedPassword);
+    }
+
+    public static void main(String[] args) {
+        String enpass = "$2a$10$9Zulz92KgoNGdMAIQBwB4u6OJoTG.z3LMI3pfpsM/KRcV3lXqxZx2";
+        String pass = "shenhuihui321";
+
+//        boolean b = matchesPassword(pass, enpass);
+
+        String s = encryptPassword(pass);
+        System.out.println(s);
+        System.out.println(enpass);
+
     }
 }

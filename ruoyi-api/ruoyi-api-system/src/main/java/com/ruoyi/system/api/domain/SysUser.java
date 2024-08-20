@@ -41,6 +41,10 @@ public class SysUser extends BaseEntity
     @Excel(name = "用户邮箱")
     private String email;
 
+    /** 所在地 */
+    @Excel(name = "所在地")
+    private String areaCode;
+
     /** 手机号码 */
     @Excel(name = "手机号码", cellType = ColumnType.TEXT)
     private String phonenumber;
@@ -287,6 +291,14 @@ public class SysUser extends BaseEntity
         this.postIds = postIds;
     }
 
+    public String getAreaCode() {
+        return areaCode;
+    }
+
+    public void setAreaCode(String areaCode) {
+        this.areaCode = areaCode;
+    }
+
     public Long getRoleId()
     {
         return roleId;
@@ -303,6 +315,7 @@ public class SysUser extends BaseEntity
             .append("deptId", getDeptId())
             .append("userName", getUserName())
             .append("nickName", getNickName())
+            .append("areaCode", getAreaCode())
             .append("email", getEmail())
             .append("phonenumber", getPhonenumber())
             .append("sex", getSex())

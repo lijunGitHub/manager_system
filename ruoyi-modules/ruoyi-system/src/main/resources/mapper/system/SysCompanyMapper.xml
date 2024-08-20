@@ -1,0 +1,158 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.ruoyi.system.mapper.SysCompanyMapper">
+    
+    <resultMap type="SysCompany" id="SysCompanyResult">
+        <result property="companyId"    column="company_id"    />
+        <result property="companyName"    column="company_name"    />
+        <result property="companyAlias"    column="company_alias"    />
+        <result property="companyType"    column="company_type"    />
+        <result property="industry"    column="industry"    />
+        <result property="companySize"    column="company_size"    />
+        <result property="establishmentDate"    column="establishment_date"    />
+        <result property="registeredAddress"    column="registered_address"    />
+        <result property="officeAddress"    column="office_address"    />
+        <result property="phone"    column="phone"    />
+        <result property="email"    column="email"    />
+        <result property="website"    column="website"    />
+        <result property="legalRepresentative"    column="legal_representative"    />
+        <result property="registeredCapital"    column="registered_capital"    />
+        <result property="creditCode"    column="credit_code"    />
+        <result property="businessPeriod"    column="business_period"    />
+        <result property="businessScope"    column="business_scope"    />
+        <result property="description"    column="description"    />
+        <result property="status"    column="status"    />
+        <result property="createdAt"    column="created_at"    />
+        <result property="updatedAt"    column="updated_at"    />
+        <result property="userId"    column="user_id"    />
+        <result property="deptId"    column="dept_id"    />
+    </resultMap>
+
+    <sql id="selectSysCompanyVo">
+        select c.company_id, c.company_name, c.company_alias, c.company_type, c.industry, c.company_size, c.establishment_date, c.registered_address, c.office_address, c.phone, c.email, c.website, c.legal_representative, c.registered_capital, c.credit_code, c.business_period, c.business_scope, c.description, c.status, c.created_at, c.updated_at from sys_company c
+        left join sys_dept d on c.dept_id=d.dept_id
+        left join sys_user u on c.user_id=u.user_id
+    </sql>
+
+    <select id="selectSysCompanyList" parameterType="SysCompany" resultMap="SysCompanyResult">
+        <include refid="selectSysCompanyVo"/>
+        <where>  
+            <if test="companyName != null  and companyName != ''"> and company_name like concat('%', #{companyName}, '%')</if>
+            <if test="companyType != null  and companyType != ''"> and company_type = #{companyType}</if>
+            <if test="industry != null  and industry != ''"> and industry = #{industry}</if>
+            <if test="companySize != null  and companySize != ''"> and company_size = #{companySize}</if>
+            <if test="establishmentDate != null "> and establishment_date = #{establishmentDate}</if>
+            <if test="phone != null  and phone != ''"> and phone = #{phone}</if>
+            <if test="legalRepresentative != null  and legalRepresentative != ''"> and legal_representative = #{legalRepresentative}</if>
+            <if test="registeredCapital != null "> and registered_capital = #{registeredCapital}</if>
+            <if test="creditCode != null  and creditCode != ''"> and credit_code = #{creditCode}</if>
+            <if test="businessPeriod != null  and businessPeriod != ''"> and business_period = #{businessPeriod}</if>
+            <if test="businessScope != null  and businessScope != ''"> and business_scope = #{businessScope}</if>
+            <if test="description != null  and description != ''"> and description = #{description}</if>
+            <if test="status != null  and status != ''"> and status = #{status}</if>
+            <if test="deptId != null and deptId != 0">
+                AND (u.dept_id = #{deptId} OR u.dept_id IN ( SELECT t.dept_id FROM sys_dept t WHERE find_in_set(#{deptId}, ancestors) ))
+            </if>
+            ${params.dataScope}
+        </where>
+    </select>
+    
+    <select id="selectSysCompanyByCompanyId" parameterType="Long" resultMap="SysCompanyResult">
+        <include refid="selectSysCompanyVo"/>
+        where company_id = #{companyId}
+        ${params.dataScope}
+    </select>
+
+
+    <insert id="insertSysCompany" parameterType="SysCompany" useGeneratedKeys="true" keyProperty="companyId">
+        insert into sys_company
+        <trim prefix="(" suffix=")" suffixOverrides=",">
+            <if test="companyName != null and companyName != ''">company_name,</if>
+            <if test="companyAlias != null">company_alias,</if>
+            <if test="companyType != null">company_type,</if>
+            <if test="industry != null">industry,</if>
+            <if test="companySize != null">company_size,</if>
+            <if test="establishmentDate != null">establishment_date,</if>
+            <if test="registeredAddress != null">registered_address,</if>
+            <if test="officeAddress != null">office_address,</if>
+            <if test="phone != null">phone,</if>
+            <if test="email != null">email,</if>
+            <if test="website != null">website,</if>
+            <if test="legalRepresentative != null">legal_representative,</if>
+            <if test="registeredCapital != null">registered_capital,</if>
+            <if test="creditCode != null">credit_code,</if>
+            <if test="businessPeriod != null">business_period,</if>
+            <if test="businessScope != null">business_scope,</if>
+            <if test="description != null">description,</if>
+            <if test="status != null">status,</if>
+            <if test="createdAt != null">created_at,</if>
+            <if test="updatedAt != null">updated_at,</if>
+            <if test="userId != null">user_id,</if>
+            <if test="deptId != null">dept_id,</if>
+         </trim>
+        <trim prefix="values (" suffix=")" suffixOverrides=",">
+            <if test="companyName != null and companyName != ''">#{companyName},</if>
+            <if test="companyAlias != null">#{companyAlias},</if>
+            <if test="companyType != null">#{companyType},</if>
+            <if test="industry != null">#{industry},</if>
+            <if test="companySize != null">#{companySize},</if>
+            <if test="establishmentDate != null">#{establishmentDate},</if>
+            <if test="registeredAddress != null">#{registeredAddress},</if>
+            <if test="officeAddress != null">#{officeAddress},</if>
+            <if test="phone != null">#{phone},</if>
+            <if test="email != null">#{email},</if>
+            <if test="website != null">#{website},</if>
+            <if test="legalRepresentative != null">#{legalRepresentative},</if>
+            <if test="registeredCapital != null">#{registeredCapital},</if>
+            <if test="creditCode != null">#{creditCode},</if>
+            <if test="businessPeriod != null">#{businessPeriod},</if>
+            <if test="businessScope != null">#{businessScope},</if>
+            <if test="description != null">#{description},</if>
+            <if test="status != null">#{status},</if>
+            <if test="createdAt != null">#{createdAt},</if>
+            <if test="updatedAt != null">#{updatedAt},</if>
+            <if test="userId != null">#{userId},</if>
+            <if test="deptId != null">#{deptId},</if>
+         </trim>
+    </insert>
+
+    <update id="updateSysCompany" parameterType="SysCompany">
+        update sys_company
+        <trim prefix="SET" suffixOverrides=",">
+            <if test="companyName != null and companyName != ''">company_name = #{companyName},</if>
+            <if test="companyAlias != null">company_alias = #{companyAlias},</if>
+            <if test="companyType != null">company_type = #{companyType},</if>
+            <if test="industry != null">industry = #{industry},</if>
+            <if test="companySize != null">company_size = #{companySize},</if>
+            <if test="establishmentDate != null">establishment_date = #{establishmentDate},</if>
+            <if test="registeredAddress != null">registered_address = #{registeredAddress},</if>
+            <if test="officeAddress != null">office_address = #{officeAddress},</if>
+            <if test="phone != null">phone = #{phone},</if>
+            <if test="email != null">email = #{email},</if>
+            <if test="website != null">website = #{website},</if>
+            <if test="legalRepresentative != null">legal_representative = #{legalRepresentative},</if>
+            <if test="registeredCapital != null">registered_capital = #{registeredCapital},</if>
+            <if test="creditCode != null">credit_code = #{creditCode},</if>
+            <if test="businessPeriod != null">business_period = #{businessPeriod},</if>
+            <if test="businessScope != null">business_scope = #{businessScope},</if>
+            <if test="description != null">description = #{description},</if>
+            <if test="status != null">status = #{status},</if>
+            <if test="createdAt != null">created_at = #{createdAt},</if>
+            <if test="updatedAt != null">updated_at = #{updatedAt},</if>
+        </trim>
+        where company_id = #{companyId}
+    </update>
+
+    <delete id="deleteSysCompanyByCompanyId" parameterType="Long">
+        delete from sys_company where company_id = #{companyId}
+    </delete>
+
+    <delete id="deleteSysCompanyByCompanyIds" parameterType="String">
+        delete from sys_company where company_id in 
+        <foreach item="companyId" collection="array" open="(" separator="," close=")">
+            #{companyId}
+        </foreach>
+    </delete>
+</mapper>

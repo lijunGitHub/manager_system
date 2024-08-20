@@ -142,7 +142,9 @@
                     :icon-class="form.icon"
                     style="width: 25px;"
                   />
-                  <i v-else slot="prefix" class="el-icon-search el-input__icon" />
+                  <i :class="['el-icon', form.icon]" v-if="form.icon"></i>
+                  <i class="el-icon-search" v-else></i>
+<!--                  <i v-else slot="prefix" class="el-icon-search el-input__icon" />-->
                 </el-input>
               </el-popover>
             </el-form-item>

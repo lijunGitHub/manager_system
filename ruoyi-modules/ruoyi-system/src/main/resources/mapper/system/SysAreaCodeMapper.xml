@@ -1,0 +1,152 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.ruoyi.system.mapper.SysAreaCodeMapper">
+
+    <resultMap type="SysAreaCode" id="SysAreaCodeResult">
+        <result property="id"    column="id"    />
+        <result property="level"    column="level"    />
+        <result property="parentCode"    column="parent_code"    />
+        <result property="areaCode"    column="area_code"    />
+        <result property="zipCode"    column="zip_code"    />
+        <result property="cityCode"    column="city_code"    />
+        <result property="name"    column="name"    />
+        <result property="shortName"    column="short_name"    />
+        <result property="mergerName"    column="merger_name"    />
+        <result property="pinyin"    column="pinyin"    />
+        <result property="lng"    column="lng"    />
+        <result property="lat"    column="lat"    />
+    </resultMap>
+
+    <sql id="selectSysAreaCodeVo">
+        select id, level, parent_code, area_code, zip_code, city_code, name, short_name, merger_name, pinyin, lng, lat from sys_area_code
+    </sql>
+
+    <select id="selectSysAreaCodeList" parameterType="SysAreaCode" resultMap="SysAreaCodeResult">
+        <include refid="selectSysAreaCodeVo"/>
+        <where>
+            <if test="level != null  and level != ''"> and level = #{level}</if>
+            <if test="parentCode != null  and parentCode != ''"> and parent_code = #{parentCode}</if>
+            <if test="areaCode != null  and areaCode != ''"> and area_code = #{areaCode}</if>
+            <if test="zipCode != null "> and zip_code = #{zipCode}</if>
+            <if test="cityCode != null  and cityCode != ''"> and city_code = #{cityCode}</if>
+            <if test="name != null  and name != ''"> and name like concat('%', #{name}, '%')</if>
+            <if test="shortName != null  and shortName != ''"> and short_name like concat('%', #{shortName}, '%')</if>
+            <if test="mergerName != null  and mergerName != ''"> and merger_name like concat('%', #{mergerName}, '%')</if>
+            <if test="pinyin != null  and pinyin != ''"> and pinyin = #{pinyin}</if>
+        </where>
+    </select>
+
+    <select id="selectSysAreaCodeById" parameterType="String" resultMap="SysAreaCodeResult">
+        <include refid="selectSysAreaCodeVo"/>
+        where id = #{id}
+    </select>
+
+
+    <select id="searchSubByCode" parameterType="String" resultMap="SysAreaCodeResult">
+        select id, level, parent_code, area_code, name from sys_area_code
+        where parent_code = #{id}
+    </select>
+
+    <select id="searchParentByCode" parameterType="String" resultMap="SysAreaCodeResult">
+        WITH RECURSIVE parent_chain AS (
+        SELECT
+        sa.id,
+        sa.level,
+        sa.parent_code,
+        sa.area_code,
+        sa.zip_code,
+        sa.city_code,
+        sa.name,
+        sa.short_name,
+        sa.merger_name,
+        sa.pinyin,
+        sa.lng,
+        sa.lat
+        FROM sys_area_code sa
+        WHERE sa.area_code = #{areaCode}
+
+        UNION ALL
+
+        SELECT
+        sa.id,
+        sa.level,
+        sa.parent_code,
+        sa.area_code,
+        sa.zip_code,
+        sa.city_code,
+        sa.name,
+        sa.short_name,
+        sa.merger_name,
+        sa.pinyin,
+        sa.lng,
+        sa.lat
+        FROM sys_area_code sa
+        JOIN parent_chain pc ON sa.area_code = pc.parent_code
+        )
+        SELECT * FROM parent_chain ORDER BY level ASC;
+    </select>
+
+
+
+
+    <insert id="insertSysAreaCode" parameterType="SysAreaCode" useGeneratedKeys="true" keyProperty="id">
+        insert into sys_area_code
+        <trim prefix="(" suffix=")" suffixOverrides=",">
+            <if test="level != null and level != ''">level,</if>
+            <if test="parentCode != null and parentCode != ''">parent_code,</if>
+            <if test="areaCode != null and areaCode != ''">area_code,</if>
+            <if test="zipCode != null">zip_code,</if>
+            <if test="cityCode != null and cityCode != ''">city_code,</if>
+            <if test="name != null and name != ''">name,</if>
+            <if test="shortName != null and shortName != ''">short_name,</if>
+            <if test="mergerName != null and mergerName != ''">merger_name,</if>
+            <if test="pinyin != null and pinyin != ''">pinyin,</if>
+            <if test="lng != null">lng,</if>
+            <if test="lat != null">lat,</if>
+        </trim>
+        <trim prefix="values (" suffix=")" suffixOverrides=",">
+            <if test="level != null and level != ''">#{level},</if>
+            <if test="parentCode != null and parentCode != ''">#{parentCode},</if>
+            <if test="areaCode != null and areaCode != ''">#{areaCode},</if>
+            <if test="zipCode != null">#{zipCode},</if>
+            <if test="cityCode != null and cityCode != ''">#{cityCode},</if>
+            <if test="name != null and name != ''">#{name},</if>
+            <if test="shortName != null and shortName != ''">#{shortName},</if>
+            <if test="mergerName != null and mergerName != ''">#{mergerName},</if>
+            <if test="pinyin != null and pinyin != ''">#{pinyin},</if>
+            <if test="lng != null">#{lng},</if>
+            <if test="lat != null">#{lat},</if>
+        </trim>
+    </insert>
+
+    <update id="updateSysAreaCode" parameterType="SysAreaCode">
+        update sys_area_code
+        <trim prefix="SET" suffixOverrides=",">
+            <if test="level != null and level != ''">level = #{level},</if>
+            <if test="parentCode != null and parentCode != ''">parent_code = #{parentCode},</if>
+            <if test="areaCode != null and areaCode != ''">area_code = #{areaCode},</if>
+            <if test="zipCode != null">zip_code = #{zipCode},</if>
+            <if test="cityCode != null and cityCode != ''">city_code = #{cityCode},</if>
+            <if test="name != null and name != ''">name = #{name},</if>
+            <if test="shortName != null and shortName != ''">short_name = #{shortName},</if>
+            <if test="mergerName != null and mergerName != ''">merger_name = #{mergerName},</if>
+            <if test="pinyin != null and pinyin != ''">pinyin = #{pinyin},</if>
+            <if test="lng != null">lng = #{lng},</if>
+            <if test="lat != null">lat = #{lat},</if>
+        </trim>
+        where id = #{id}
+    </update>
+
+    <delete id="deleteSysAreaCodeById" parameterType="String">
+        delete from sys_area_code where id = #{id}
+    </delete>
+
+    <delete id="deleteSysAreaCodeByIds" parameterType="String">
+        delete from sys_area_code where id in
+        <foreach item="id" collection="array" open="(" separator="," close=")">
+            #{id}
+        </foreach>
+    </delete>
+</mapper>
